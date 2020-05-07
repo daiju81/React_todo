@@ -9,19 +9,38 @@ import '../css/AppHeader.css';
 class App extends Component {
   constructor() {
     super();
-    const todos = [
-      {
-        id: 1,
-        title: '勉強',
-        desc: '勉強',
-        done: false,
-      },
-    ];
+    const todos = [];
     this.state = {
       todos,
       countTodo: todos.length + 1,
     };
     this.setTodoStatus = this.setTodoStatus.bind(this);
+  }
+
+  fetchData(url) {
+    this.setState({ isLoading: true });
+    fetch(url)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) {
+          throw Error(response.statusText);
+        }
+        this.setState({ isLoading: false });
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        let countTodo = this.state.countTodo;
+        const todos = data.map((data) => {
+          const todo = Object.assign({}, data, {
+            id: countTodo++,
+            done: false,
+          });
+          return todo;
+        });
+        this.setState({ todos, countTodo });
+      })
+      .catch(() => this.setState({ hasError: true }));
   }
 
   setTodoStatus(clickTodo) {
@@ -60,6 +79,9 @@ class App extends Component {
     e.target.title.value = '';
     e.target.desc.value = '';
   }
+  componentDidMount() {
+    this.fetchData('data.json');
+  }
   render() {
     return (
       <div className="app">
@@ -70,6 +92,8 @@ class App extends Component {
           todos={this.state.todos}
           setTodoStatus={this.setTodoStatus}
           deleteTodo={this.deleteTodo.bind(this)}
+          isLoading={this.state.isLoading}
+          hasError={this.state.hasError}
         />
       </div>
     );

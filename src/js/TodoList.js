@@ -12,6 +12,13 @@ class TodoList extends Component {
         deleteTodo={this.props.deleteTodo}
       />
     ));
+    if (this.props.isLoading) {
+      return <h2>loading . . . </h2>;
+    }
+
+    if (this.props.hasError) {
+      return <h2>error</h2>;
+    }
 
     return <ul>{todos}</ul>;
   }
